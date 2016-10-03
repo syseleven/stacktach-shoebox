@@ -154,9 +154,12 @@ class WritingJSONRollManager(object):
     A SHA-256 of the payload may be included in the archive filename.
     """
 
-    def __init__(self, filename_template, roll_checker, directory='.', destination_directory='.',
+    def __init__(self, filename_template, roll_checker, live_filename_template=None, directory='.', destination_directory='.',
                  roll_size_mb='1000', roll_minutes='60', archive_callback=None):
         self.filename_template = filename_template
+        if not(live_filename_template):
+            live_filename_template = filename_template
+        self.live_filename_template = live_filename_template
         self.directory = directory
         self.destination_directory = destination_directory
         self.roll_size_mb = int(roll_size_mb)
@@ -182,10 +185,12 @@ class WritingJSONRollManager(object):
             if os.path.isfile(full):
                 self._do_roll(full)
 
-    def _make_filename(self, crc, prefix):
+    def _make_filename(self, crc, prefix, template=None):
+        if not(template):
+            template = self.filename_template
         now = notification_utils.now()
         dt = str(notification_utils.dt_to_decimal(now))
-        f = now.strftime(self.filename_template)
+        f = now.strftime(template)
         f = f.replace(" ", "_")
         f = f.replace("/", "_")
         f = f.replace(":", "_")
@@ -244,7 +249,7 @@ class WritingJSONRollManager(object):
 
     def _get_handle(self):
         if not self.handle:
-            self.filename = self._make_filename('[[CRC]]', self.directory)
+            self.filename = self._make_filename('[[CRC]]', self.directory, self.live_filename_template)
             self.handle = open(self.filename, "w")
             self.start_time = self._get_time()
 
