@@ -154,13 +154,13 @@ class WritingJSONRollManager(object):
     A SHA-256 of the payload may be included in the archive filename.
     """
 
-    def __init__(self, *args, **kwargs):
-        self.filename_template = args[0]
-        self.directory = kwargs.get('directory', '.')
-        self.destination_directory = kwargs.get('destination_directory', '.')
-        self.roll_size_mb = int(kwargs.get('roll_size_mb', 1000))
-        minutes = kwargs.get('roll_minutes', 60)
-        self.roll_after = datetime.timedelta(minutes=minutes)
+    def __init__(self, filename_template, roll_checker, directory='.', destination_directory='.',
+                 roll_size_mb='1000', roll_minutes='60', archive_callback=None):
+        self.filename_template = filename_template
+        self.directory = directory
+        self.destination_directory = destination_directory
+        self.roll_size_mb = int(roll_size_mb)
+        self.roll_after = datetime.timedelta(minutes=int(roll_minutes))
 
         # Look in the working directory for any files. Move them to the
         # destination directory before we start. This implies we
